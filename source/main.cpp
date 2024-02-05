@@ -229,6 +229,12 @@ int main(int argc, char* argv[])
     Result rc=0;
     memset(url, 0, sizeof(url));
 
+#ifdef SHOW_LOG
+    PadState pad;
+    initConsole(&pad);
+    atexit(exitConsole);
+#endif
+
     rc = romfsInit();
     if (R_FAILED(rc))
         printf("romfsInit: %08X\n", rc);
@@ -238,12 +244,6 @@ int main(int argc, char* argv[])
         readfile("romfs:/weblink.txt", url);
         printf("url: %s\n", url);
     }
-
-#ifdef SHOW_LOG
-    PadState pad;
-    initConsole(&pad);
-    atexit(exitConsole);
-#endif
 
     initUser();
 
