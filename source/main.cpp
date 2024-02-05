@@ -18,7 +18,6 @@ using namespace std;
 // Uncomment this line to show log
 // #define SHOW_LOG 1
 
-#ifdef SHOW_LOG
 static void initConsole(PadState *pad)
 {
     consoleInit(NULL);
@@ -35,7 +34,6 @@ static void exitConsole(void)
     // Deinitialize and clean up resources used by the console (important!)
     consoleExit(NULL);
 }
-#endif
 
 void readfile(const char* path, char * url)
 {
@@ -234,6 +232,30 @@ int main(int argc, char* argv[])
     initConsole(&pad);
     atexit(exitConsole);
 #endif
+
+    // Check if the applet is being run from the album
+    if (appletGetAppletType() != AppletType_Application)
+    {
+        // The applet cannot run if launched from the album menu, please launch by overriding a title!
+#ifndef SHOW_LOG
+        PadState pad;
+        initConsole(&pad);
+        atexit(exitConsole);
+#endif
+        consoleClear();
+        printf(CONSOLE_RED "The applet cannot run if launched from the album menu." CONSOLE_RESET);
+        printf("\nplease launch by overriding a title!\n");
+        printf("Press + to exit.\n");
+        while (appletMainLoop())
+        {    
+            padUpdate(&pad);
+            u64 kDown = padGetButtonsDown(&pad);
+            if (kDown & HidNpadButton_Plus)
+                break; // break in order to return to hbmenu
+            consoleUpdate(NULL);
+        }
+        return 0;
+    }
 
     rc = romfsInit();
     if (R_FAILED(rc))
